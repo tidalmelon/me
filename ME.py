@@ -70,12 +70,16 @@ def LoadData():
 
 
 def ComputeFeaEmpDistribution():
+    """
+    计算约束函数f到经验分布
+    FeaClassTable: 词，类别的频率的二维数组
+    """
     global C
     global FeaClassTable
     FeaClassTable = {}
     for wid in WordDic.keys():
         tempPair = ({}, {})
-        # wid:({cid:sum, cid:sum}, {classid: 0.0})
+        # wid:({cid:sum, cid:sum}, {classid: 0.0, classid: 0.0})
         # wid 在某个分类下的出现次数和（从全部docments统计)
         FeaClassTable[wid] = tempPair
     maxCount = 0
@@ -84,6 +88,7 @@ def ComputeFeaEmpDistribution():
             maxCount = len(doc[0])
     C = maxCount + 1
     for doc in DocList:
+        #({wid:1}, classid)
         doc[0][CommonFeaId] = C - len(doc[0])
         for wid in doc[0].keys():
             if doc[1] not in FeaClassTable[wid][0]:
@@ -97,7 +102,7 @@ def GIS():
     global FeaWeigths
     for wid in WordDic.keys():
         FeaWeigths[wid] = {}
-        # wid : {classid: 0.0}
+        # wid : {classid: 0.0, classid: 0.0}
         for classid in ClassList:
             FeaWeigths[wid][classid] = 0.0
     n = 0
@@ -126,6 +131,8 @@ def GIS():
                 sum += pyx
             for i in range(len(ClassList)):
                 classProbs[i] = classProbs[i] / sum
+
+            # 得到p(y|x),计算约束函数f的模型期望EP(f) = p(y|x) * f(x,y)
             for i in range(len(ClassList)):
                 classid = ClassList[i]
                 if classid == doc[1]:
