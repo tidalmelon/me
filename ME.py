@@ -29,13 +29,10 @@ def LoadData():
     global CommonFeaId
     i = 0
     infile = file(TrainingDataFile, 'r')
-    sline = infile.readline().strip()
+    sline = infile.readline().strip().decode('utf-8')
     maxwid = 0
     while len(sline) > 0:
-        pos = sline.find('#')
-        if pos > 0:
-            sline = sline[:pos].strip()
-        words = sline.split(' ')
+        words = sline.split('\t')
         if len(words) < 1:
             print 'Format error'
             break
@@ -60,7 +57,7 @@ def LoadData():
         i += 1
         #({wid:1}, classid)
         DocList.append((newDoc, classid))
-        sline = infile.readline().strip()
+        sline = infile.readline().strip().decode('utf-8')
     infile.close()
     print len(DocList), "instances loaded!"
     print len(ClassList), " classes!", len(WordDic), " words !"
@@ -126,6 +123,8 @@ def GIS():
                 pyx = 0.0
                 for wid in doc[0].keys():
                     pyx += FeaWeigths[wid][classid]
+                # 第一轮迭代，pyx=0, e^0=1,则各文档x属于各个分类的概率相等
+                # 第二轮迭代，由于新“信息”的增加，熵会变化
                 pyx = math.exp(pyx)
                 classProbs[i] = pyx
                 sum += pyx
@@ -157,8 +156,7 @@ def GIS():
                 FeaWeigths[wid][classid] += math.log(FeaClassTable[wid][0][classid] / FeaClassTable[wid][1][classid]) / C
         print 'loglikelihood:', logllh
 
-
-def predict(doc):
+def Predict(doc):
     classid = ClassList[0]
     maxClass = classid
     sum = 0.0
@@ -179,26 +177,72 @@ def predict(doc):
     return maxClass
 
 
+def Test():
+	TrueLabelList = []
+	PredLabelList = []
+	i =0
+	infile = file(TestDataFile, 'r')
+	outfile = file(TestOutFile, 'w')
+	sline = infile.readline().strip()
+	scoreDic = {}
+	iline = 0
+	while len(sline) > 0:
+		iline += 1
+		if iline % 10 == 0:
+			print iline," lines finished!\r",
+		pos = sline.find("#")
+		if pos > 0:
+			sline = sline[:pos].strip()
+		words = sline.split(' ')
+		if len(words) < 1:
+			print "Format error!"
+			break
+		classid = int(words[0])
+		TrueLabelList.append(classid)
+		words = words[1:]
+		#remove duplicate words, binary distribution
+		words = Dedup(words)
+		maxScore = 0.0
+		newdoc = {}
+		for word in words:
+			if len(word) < 1:
+				continue
+			wid = int(word)
+			if wid not in newdoc:
+				newdoc[wid] = 1
+		maxClass = Predict(newdoc)
+		PredLabelList.append(maxClass)
+		sline = infile.readline().strip()
+	infile.close()
+	outfile.close()
+	print len(PredLabelList),len(TrueLabelList)
+	return TrueLabelList,PredLabelList
 
 
+def Evaluate(TrueList, PredList):
+	accuracy = 0
+	i = 0
+	while i < len(TrueList):
+		if TrueList[i] == PredList[i]:
+			accuracy += 1
+		i += 1
+	accuracy = (float)(accuracy)/(float)(len(TrueList))
+	print "Accuracy:",accuracy
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+def CalPreRec(TrueList,PredList,classid):
+	correctNum = 0
+	allNum = 0
+	predNum = 0
+	i = 0
+	while i < len(TrueList):
+		if TrueList[i] == classid:
+			allNum += 1
+			if PredList[i] == TrueList[i]:
+				correctNum += 1
+		if PredList[i] == classid:
+			predNum += 1
+		i += 1
+	return (float)(correctNum)/(float)(predNum),(float)(correctNum)/(float)(allNum)
 
 
 
