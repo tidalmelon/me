@@ -1,3 +1,3 @@
-最大熵模型
+### 最大熵模型
 
-![qd](https://github.com/tidalmelon/math/blob/master/derivative/d.png)  
+![entropy_1](https://github.com/tidalmelon/me/blob/master/img/entropy_1.png)  
