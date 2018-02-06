@@ -189,7 +189,7 @@ def LoadModel():
                 FeaWeigths[wid][classid] = float(arr[i])
                 i += 1
     ClassList = []
-    for classidlist = in FeaWeigths.values():
+    for classidlist in FeaWeigths.values():
         for classid in classidlist:
             ClassList.append(classid)
     print len(FeaWeigths), ' words!', len(ClassList), ' class!'
