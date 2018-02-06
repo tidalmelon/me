@@ -6,7 +6,6 @@ import math
 TrainingDataFile = 'newdata.train'
 ModelFile = 'newdata.model'
 TestDataFile = 'newdata.test'
-TestOutFile = 'newdata.out'
 DocList = []
 WordDic = {}
 FeaClassTable = {}
@@ -55,7 +54,6 @@ def LoadData():
             if wid not in newDoc:
                 newDoc[wid] = 1
         i += 1
-        #({wid:1}, classid)
         DocList.append((newDoc, classid))
         sline = infile.readline().strip().decode('utf-8')
     infile.close()
@@ -76,8 +74,6 @@ def ComputeFeaEmpDistribution():
     FeaClassTable = {}
     for wid in WordDic.keys():
         tempPair = ({}, {})
-        # wid:({cid:sum, cid:sum}, {classid: 0.0, classid: 0.0})
-        # wid 在某个分类下的出现次数和（从全部docments统计)
         FeaClassTable[wid] = tempPair
     maxCount = 0
     for doc in DocList:
@@ -124,7 +120,6 @@ def GIS():
                 for wid in doc[0].keys():
                     pyx += FeaWeigths[wid][classid]
                 # 第一轮迭代，pyx=0, e^0=1,则各文档x属于各个分类的概率相等
-                # 第二轮迭代，由于新“信息”的增加，熵会变化
                 pyx = math.exp(pyx)
                 classProbs[i] = pyx
                 sum += pyx
@@ -137,14 +132,11 @@ def GIS():
                 if classid == doc[1]:
                     logllh += math.log(classProbs[i])
                 for wid in doc[0].keys():
-                    # wid:({cid:sum, cid:sum}, {classid: 0.0})
-                    #({wid:1}, classid)
                     FeaClassTable[wid][1][classid] += classProbs[i] * doc[0][wid]
         #update feature weights
         for wid in WordDic.keys():
             for classid in ClassList:
                 empValue = 0.0
-                # wid:({cid:sum, cid:sum}, {classid: 0.0})
                 if classid in FeaClassTable[wid][0]:
                     empValue = FeaClassTable[wid][0][classid]
                 modelValue = 0.0
@@ -152,7 +144,6 @@ def GIS():
                     modelValue = FeaClassTable[wid][1][classid]
                 if empValue == 0.0 or modelValue == 0.0:
                     continue
-                # wid : {classid: 0.0}
                 FeaWeigths[wid][classid] += math.log(FeaClassTable[wid][0][classid] / FeaClassTable[wid][1][classid]) / C
         print 'loglikelihood:', logllh
 
@@ -166,7 +157,6 @@ def SaveModel():
                 outfile.write(str(classid) + ' ')
                 outfile.write(str(FeaWeigths[wid][classid]) + ' ')
             outfile.write('\n')
-
 
 def LoadModel():
     global ClassList
@@ -192,10 +182,14 @@ def LoadModel():
     for classidlist in FeaWeigths.values():
         for classid in classidlist:
             ClassList.append(classid)
+        break
     print len(FeaWeigths), ' words!', len(ClassList), ' class!'
 
 
 def Predict(doc):
+    """
+    规范化因子 对 同一个doc为固定直
+    """
     classid = ClassList[0]
     maxClass = classid
     sum = 0.0
@@ -219,4 +213,74 @@ def Test():
     TrueLabelList = []
     PredLabelList = []
     i = 0
+    infile = file(TestDataFile, 'r')
+    line = infile.readline().strip()
+    scoreDic = {}
+    iline = 0
+    while line:
+        iline += 1
+        if iline % 10 == 0:
+            print iline, ' iline finished!',
+            words = line.split('\t')
+            classid = int(words[0])
+            TrueLabelList.append(classid)
+            words = words[1:]
+            # binary distribution
+            words = Dedup(words)
+            maxScore = 0.0
+            newDoc = {}
+            for word in words:
+                if not word:
+                    continue
+                wid = int(word)
+                if wid not in newDoc:
+                    newDoc[wid] = 1
+            maxClass = Predict(newDoc)
+            PredLabelList.append(maxClass)
+            line = infile.readline().strip()
+    infile.close()
+    print len(PredLabelList), len(TrueLabelList)
+    return TrueLabelList, PredLabelList
 
+def Evaluate(TrueList, PredList):
+    accuracy = 0
+    for i in range(len(TrueList)):
+        if TrueList[i] == PredList[i]:
+            accuracy += 1
+    accuracy = float(accuracy) / len(TrueList)
+    print 'Accuracy:', accuracy
+
+def CalPreRec(TrueList, PredList, classid):
+    correctNum = 0
+    allNum = 0
+    predNum = 0
+    for i in range(len(TrueList)):
+        if TrueList[i] == classid:
+            allNum += 1
+            if TrueList[i] == PredList[i]:
+                correctNum += 1
+        if PredList[i] == classid:
+            predNum += 1
+
+    return float(correctNum) / predNum, float(correctNum) / allNum
+
+if __name__ == '__main__':
+    if sys.argv[1] == '1':
+        print 'start training:'
+        TrainingDataFile = sys.argv[2]
+        ModelFile = sys.argv[3]
+        LoadData()
+        ComputeFeaEmpDistribution()
+        GIS()
+        SaveModel()
+    if sys.argv[1] == '0':
+        print 'start testing:'
+        TestDataFile = sys.argv[2]
+        ModelFile = sys.argv[3]
+        LoadModel()
+        TList, PList = Test()
+        Evaluate(TList, PList)
+        print '-------------------------------------------'
+        for classid in ClassList:
+            pre, rec = CalPreRec(TList, PList, classid)
+            print 'precision and recall for class', classid, ':', pre, rec
