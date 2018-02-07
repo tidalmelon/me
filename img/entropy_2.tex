@@ -1,0 +1,40 @@
+\documentclass{ctexart}
+\begin{document}
+
+
+
+$$\Psi \left(\lambda \right) = \min_{p \in C}L \left(p, \lambda \right) = L \left(p_{\lambda}, \lambda \right) $$
+
+$$ p_{\lambda} = \mathop{\arg\min}_{p \in C} L \left(p, \lambda \right)$$
+
+
+$$\frac{\partial L \left(p,\lambda \right)}{\partial p \left(y|x\right)}  $$ 
+
+
+$$ = \sum_{x, y \in \tau}\tilde{p} \left(x\right) \left(\log p \left(y|x\right) + 1 \right)  - \sum_{y}\lambda_{0}  -\sum_{i=1}^{n}\lambda_{i} \left( \sum_{x,y \in \tau} \tilde{p} \left(x\right) f_{i}(x,y) \right)    $$
+
+$$ = \sum_{x, y \in \tau}\tilde{p} \left(x\right) \left(\log p \left(y|x\right) + 1 \right)  - \sum_{x} \tilde{p}(x)\sum_{y}\lambda_{0}  - \sum_{x,y \in \tau} \tilde{p}  \left(x\right) \left(  \sum_{i=1}^{n}\lambda_{i} f_{i}(x,y) \right)    $$
+
+$$ = \sum_{x, y \in \tau}\tilde{p} (x) (\log p (y|x) + 1 ) - \sum_{x,y \in \tau} \tilde{p}(x)\lambda_{0} -  \sum_{x,y \in \tau} \tilde{p}  \left(x\right) \left(  \sum_{i=1}^{n}\lambda_{i} f_{i}(x,y) \right)$$
+
+$$ = \sum_{x,y \in \tau} \tilde{p}(x) \left(   \log p \left(y|x\right) + 1 - \lambda_{0} - \sum_{i=1}^{n}\lambda_{i}f_{i}\left(x,y\right)           \right) = 0 $$
+
+$$  p\left(y|x\right) = e^{\lambda_{0}-1}  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }       $$
+$$ \sum_y p \left(y|x\right) = e^{\lambda_{0}-1} \sum_y  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }    = 1 $$
+
+$$  e^{\lambda_{0}-1}  = \frac{1}{   \sum\limits_y  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }    }  $$
+
+
+$$   p\left(y|x\right) = \frac{1}{   \sum\limits_y  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }    }  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }     $$
+
+$$ Z_{\lambda}\left(x\right) =       \sum_y  e^{ \sum\limits_{i=1}^{n} \lambda_{i}  f_{i}\left(x,y\right)    }    $$
+
+
+
+
+
+
+
+
+
+\end{document}
