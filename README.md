@@ -2,9 +2,9 @@
 
 #### 资料
 
-[](https://blog.csdn.net/yutao03081/article/details/78812014)
+[拉格朗日](https://blog.csdn.net/yutao03081/article/details/78812014)
 
-[](https://www.jianshu.com/p/74092741e478)
+[拉格朗日](https://www.jianshu.com/p/74092741e478)
 
 [拉格朗日对偶](https://blog.csdn.net/frostime/article/details/90291392)
 
