@@ -2,6 +2,12 @@
 
 #### 资料
 
+[熵的概念](http://www.ruanyifeng.com/blog/2019/08/information-theory.html)
+
+
+[条件熵的推导](https://www.cnblogs.com/ooon/p/5707889.html)
+
+
 [星环科技](https://zhuanlan.zhihu.com/c_1033737290815942656)
 
 [拉格朗日](https://blog.csdn.net/yutao03081/article/details/78812014)
